@@ -5,36 +5,41 @@ import lunr from 'lunr';
  * config provide only searchableFields
  */
 export class Fulltext {
-  constructor(items, config) {
+  constructor(items, config, index) {
     this.store = new Map();
 
+	  if (index) {
+		  config.custom_id_field = 'id';
+		  this.idx = lunr.Index.load(JSON.parse(index));
+		} else {
     // creating index
-    this.idx = lunr(function () {
-      // currently schema hardcoded
-      this.field('name', { boost: 10 });
+			this.idx = lunr(function () {
+				// currently schema hardcoded
+				this.field('name', { boost: 10 });
 
-      const searchableFields = config?.searchableFields || [];
-      searchableFields.forEach((field) => this.field(field));
-      this.ref('_id');
+				const searchableFields = config?.searchableFields || [];
+				searchableFields.forEach((field) => this.field(field));
+				this.ref('_id');
 
-      /**
-       * Remove the stemmer and stopWordFilter from the pipeline
-       * stemmer: https://github.com/olivernn/lunr.js/issues/328
-       * stopWordFilter: https://github.com/olivernn/lunr.js/issues/233
-       */
-      if (config?.isExactSearch) {
-        this.pipeline.remove(lunr.stemmer);
-        this.pipeline.remove(lunr.stopWordFilter);
-      }
+				/**
+				 * Remove the stemmer and stopWordFilter from the pipeline
+				 * stemmer: https://github.com/olivernn/lunr.js/issues/328
+				 * stopWordFilter: https://github.com/olivernn/lunr.js/issues/233
+				 */
+				if (config?.isExactSearch) {
+					this.pipeline.remove(lunr.stemmer);
+					this.pipeline.remove(lunr.stopWordFilter);
+				}
 
-      /**
-       * Remove the stopWordFilter from the pipeline
-       * stopWordFilter: https://github.com/itemsapi/itemsjs/issues/46
-       */
-      if (config?.removeStopWordFilter) {
-        this.pipeline.remove(lunr.stopWordFilter);
-      }
-    });
+				/**
+				 * Remove the stopWordFilter from the pipeline
+				 * stopWordFilter: https://github.com/itemsapi/itemsjs/issues/46
+				 */
+				if (config?.removeStopWordFilter) {
+					this.pipeline.remove(lunr.stopWordFilter);
+				}
+			});
+		}
 
     let i = 1;
     (items || []).map((item) => {

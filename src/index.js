@@ -1,3 +1,4 @@
+import lunr from 'lunr';
 import { search, similar, aggregation } from './lib.js';
 import { mergeAggregations } from './helpers.js';
 import { Fulltext } from './fulltext.js';
